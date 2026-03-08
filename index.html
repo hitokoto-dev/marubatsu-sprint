@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ââ æ©æ¼ãââå¤å®</title>
+<title>○✕ 早押し○✕判定</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
@@ -114,7 +114,7 @@
     font-weight: 700; line-height: 1.5;
   }
 
-  /* ââ Buttons */
+  /* ○✕ Buttons */
   .marubatsu-buttons {
     display: flex; gap: 24px; width: 100%; max-width: 400px; justify-content: center;
   }
@@ -239,26 +239,26 @@
 <body>
 
 <!-- Sound Toggle -->
-<button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">ð</button>
+<button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊</button>
 
 <!-- Title Screen -->
 <div id="title-screen" class="screen active">
-  <div class="game-logo">ââ æ©æ¼ã<br>å¤å®</div>
-  <div class="game-subtitle">æãæ­£ãããã°âãééããªãâãé¸ã¼ã</div>
-  <button class="btn btn-primary" onclick="startGame()">ã¹ã¿ã¼ã</button>
-  <button class="btn btn-secondary" onclick="showRanking()">ð ã©ã³ã­ã³ã°</button>
+  <div class="game-logo">○✕ 早押し<br>判定</div>
+  <div class="game-subtitle">文が正しければ○、間違いなら✕を選ぼう</div>
+  <button class="btn btn-primary" onclick="startGame()">スタート</button>
+  <button class="btn btn-secondary" onclick="showRanking()">🏆 ランキング</button>
   <div class="best-score-display" id="best-score-display"></div>
   <div class="rule-box">
-    <div class="rule-title">ð ããã³ãã</div>
+    <div class="rule-title">📖 あそびかた</div>
     <p>
-      ã»è¡¨ç¤ºãããæãæ­£ãããã° â ãã¿ãã<br>
-      ã»ééã£ã¦ããã° â ãã¿ãã<br>
-      ã»2ç§ä»¥åã«æ­£è§£ã§ã¹ãã¼ããã¼ãã¹ +50<br>
-      ã»5é£ç¶æ­£è§£ã§ã³ã³ããã¼ãã¹ +100<br>
-      ã»3åãã¹ã§ã²ã¼ã ãªã¼ãã¼
+      ・表示される文が正しければ ○ をタップ<br>
+      ・間違っていれば ✕ をタップ<br>
+      ・2秒以内に正解でスピードボーナス +50<br>
+      ・5連続正解でコンボボーナス +100<br>
+      ・3回ミスでゲームオーバー
     </p>
   </div>
-  <div class="kb-hint">ð¥ï¸ ã­ã¼ãã¼ã: â â / â â</div>
+  <div class="kb-hint">🖥️ キーボード: ← ○ / → ✕</div>
 </div>
 
 <!-- Countdown Screen -->
@@ -269,9 +269,9 @@
 <!-- Game Screen -->
 <div id="game-screen" class="screen">
   <div class="game-hud">
-    <div class="hud-score">ã¹ã³ã¢: <span id="hud-score">0</span></div>
+    <div class="hud-score">スコア: <span id="hud-score">0</span></div>
     <div class="hud-combo" id="hud-combo"></div>
-    <div class="hud-miss" id="hud-miss">â¥â¥â¥</div>
+    <div class="hud-miss" id="hud-miss">♥♥♥</div>
   </div>
 
   <div class="question-area">
@@ -280,12 +280,12 @@
     </div>
     <div class="marubatsu-buttons">
       <div class="mb-btn mb-btn-maru" id="btn-maru" onclick="answer(true)">
-        â
-        <span class="mb-btn-label">æ­£ãã</span>
+        ○
+        <span class="mb-btn-label">正しい</span>
       </div>
       <div class="mb-btn mb-btn-batsu" id="btn-batsu" onclick="answer(false)">
-        â
-        <span class="mb-btn-label">ééã</span>
+        ✕
+        <span class="mb-btn-label">間違い</span>
       </div>
     </div>
   </div>
@@ -293,29 +293,29 @@
 
 <!-- Result Screen -->
 <div id="result-screen" class="screen">
-  <div class="result-label">ã¹ã³ã¢</div>
+  <div class="result-label">スコア</div>
   <div class="result-score" id="result-score">0</div>
-  <div id="result-new-record" class="result-new-record" style="display:none">ð NEW RECORD!</div>
+  <div id="result-new-record" class="result-new-record" style="display:none">🎉 NEW RECORD!</div>
   <div class="result-stats" id="result-stats"></div>
   <div class="name-input-area" id="name-input-area">
-    <input type="text" id="player-name" placeholder="ååãå¥å" maxlength="10">
-    <button class="btn btn-primary" style="padding:12px 24px;font-size:1rem" id="save-btn" onclick="saveScore()">ä¿å­</button>
+    <input type="text" id="player-name" placeholder="名前を入力" maxlength="10">
+    <button class="btn btn-primary" style="padding:12px 24px;font-size:1rem" id="save-btn" onclick="saveScore()">保存</button>
   </div>
   <div class="save-status" id="save-status"></div>
-  <button class="btn btn-primary" onclick="startGame()" style="margin-top:8px">ããä¸å</button>
-  <button class="btn btn-secondary" onclick="showRanking()">ð ã©ã³ã­ã³ã°</button>
-  <button class="btn btn-secondary" onclick="showTitle()">ã¿ã¤ãã«ã¸</button>
+  <button class="btn btn-primary" onclick="startGame()" style="margin-top:8px">もう一回</button>
+  <button class="btn btn-secondary" onclick="showRanking()">🏆 ランキング</button>
+  <button class="btn btn-secondary" onclick="showTitle()">タイトルへ</button>
 </div>
 
 <!-- Ranking Screen -->
 <div id="ranking-screen" class="screen">
-  <div class="ranking-title">ð ã©ã³ã­ã³ã°</div>
+  <div class="ranking-title">🏆 ランキング</div>
   <div class="ranking-tabs">
-    <button class="ranking-tab active" id="tab-global" onclick="switchRankingTab('global')">ð å¨å¡</button>
-    <button class="ranking-tab" id="tab-local" onclick="switchRankingTab('local')">ð± èªå</button>
+    <button class="ranking-tab active" id="tab-global" onclick="switchRankingTab('global')">🌍 全員</button>
+    <button class="ranking-tab" id="tab-local" onclick="switchRankingTab('local')">📱 自分</button>
   </div>
   <div class="ranking-list" id="ranking-list"></div>
-  <button class="btn btn-secondary" onclick="showTitle()" style="margin-top:16px">æ»ã</button>
+  <button class="btn btn-secondary" onclick="showTitle()" style="margin-top:16px">戻る</button>
 </div>
 
 <script>
@@ -332,7 +332,7 @@ function initAudio() {
 
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  document.getElementById('sound-toggle').textContent = soundEnabled ? 'ð' : 'ð';
+  document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
 }
 
 function playSE(type) {
@@ -428,94 +428,94 @@ function playSE(type) {
 }
 
 // ========================================
-// QUESTIONS (60å)
+// QUESTIONS (60問)
 // ========================================
 const questions = [
-  // === æ¥æ¬å°çã»å°å½¢ ===
-  { statement: "å¯å£«å±±ã¯æ¥æ¬ä¸é«ãå±±ã§ãã", answer: true },
-  { statement: "åæµ·éã¯æ¥æ¬ä¸é¢ç©ãåºãé½éåºçã§ãã", answer: true },
-  { statement: "çµç¶æ¹ã¯æ¥æ¬ä¸å¤§ããæ¹ã§ãã", answer: true },
-  { statement: "æåç«¯ã®é½éåºçã¯åæµ·éã§ãã", answer: true },
-  { statement: "æåç«¯ã®é½éåºçã¯æ²ç¸çã§ãã", answer: false },
-  { statement: "æ¥æ¬ã®é¦é½ã¯æ±äº¬é½ã§ãã", answer: true },
-  { statement: "ç¬æ¸åæµ·ã¯ä¸çä¸å¤§ããåæµ·ã§ãã", answer: false },
-  { statement: "æ¬å·ã¯æ¥æ¬ä¸å¤§ããå³¶ã§ãã", answer: true },
-  { statement: "æ¥æ¬ã§ä¸çªé·ãå·ã¯ä¿¡æ¿å·ã§ãã", answer: true },
-  { statement: "åå½ã¯ä¹å·ããé¢ç©ãå¤§ãã", answer: false },
-  { statement: "æ±äº¬ã¹ã«ã¤ããªã¼ã¯æ±äº¬ã¿ã¯ã¼ããé«ã", answer: true },
-  { statement: "æ¥æ¬ã«ã¯47ã®é½éåºçããã", answer: true },
-  { statement: "æ²ç¸çã¯æ¥æ¬ã§ä¸çªäººå£ãå°ãªãçã§ãã", answer: false },
-  { statement: "æ¥æ¬æµ·ã¯å¤ªå¹³æ´ããå¤§ãã", answer: false },
+  // === 日本地理・地形 ===
+  { statement: "富士山は日本一高い山である", answer: true },
+  { statement: "北海道は日本一面積が広い都道府県である", answer: true },
+  { statement: "琵琶湖は日本一大きい湖である", answer: true },
+  { statement: "最北端の都道府県は北海道である", answer: true },
+  { statement: "最南端の都道府県は沖縄県である", answer: false },
+  { statement: "日本の首都は東京都である", answer: true },
+  { statement: "瀬戸内海は世界一大きい内海である", answer: false },
+  { statement: "本州は日本一大きい島である", answer: true },
+  { statement: "日本で一番長い川は信濃川である", answer: true },
+  { statement: "四国は九州より面積が大きい", answer: false },
+  { statement: "東京スカイツリーは東京タワーより高い", answer: true },
+  { statement: "日本には4�7#��遽道府県がある", answer: true },
+  { statement: "沉縄県は日本で一番人口が少ない県である", answer: false },
+  { statement: "日本海は太平洋より大きい", answer: false },
 
-  // === ç§å­¦ã»ç©ç ===
-  { statement: "æ°´ã®æ²¸ç¹ã¯100âã§ãã", answer: true },
-  { statement: "éã¯éããå¯åº¦ãé«ã", answer: true },
-  { statement: "åã®éåº¦ã¯é³ã®éåº¦ããéã", answer: true },
-  { statement: "éã¯ç£ç³ã«å¼ãä»ãããã", answer: true },
-  { statement: "ãã©ã¹ããã¯ã¯çããªãç´ æã§ãã", answer: false },
-  { statement: "å°çã¯å¤ªé½ããå¤§ãã", answer: false },
-  { statement: "ãã¤ã¤ã¢ã³ãã¯ç­ç´ ããã§ãã¦ãã", answer: true },
-  { statement: "é»æ°ã¯ç®ã§è¦ããã¨ãã§ãã", answer: false },
-  { statement: "æã¯å°çã®å¨ããåã£ã¦ãã", answer: true },
-  { statement: "å¤ªé½ã¯å°çã®å¨ããåã£ã¦ãã", answer: false },
-  { statement: "æ°·ã¯æ°´ããå¯åº¦ãä½ã", answer: true },
-  { statement: "é³ã¯çç©ºä¸­ãä¼ãã", answer: false },
+  // === 秉学・物理 ===
+  { statement: "水の沺点は100℃である", answer: true },
+  { statement: "金は鉄より密度が高い", answer: true },
+  { statement: "光の速度は音の速度より速い", answer: true },
+  { statement: "鉄は磁石に引き付けられる", answer: true },
+  { statement: "プラスチックは燃えない素材である", answer: false },
+  { statement: "地球は太陽より大きい", answer: false },
+  { statement: "ダイヤモンドは炭素からできている", answer: true },
+  { statement: "電気は目でスることができる", answer: false },
+  { statement: "月は地球の周りを回っている", answer: true },
+  { statement: "太陽は地球の周りを回っている", answer: false },
+  { statement: "氷は水より密度が低い", answer: true },
+  { statement: "音は真空中を伝わる", answer: false },
 
-  // === ççã»åç© ===
-  { statement: "ã¯ã¸ã©ã¯åºä¹³åç©ã§ãã", answer: true },
-  { statement: "ãã³ã®ã³ã¯é£ã¹ãªãé³¥ã§ãã", answer: true },
-  { statement: "èèã¯æè«ã§ãã", answer: false },
-  { statement: "ãã«ã²ã¯ç¬è«é¡ã§ãã", answer: true },
-  { statement: "ã³ã¦ã¢ãªã¯åºä¹³åç©ã§ãã", answer: true },
-  { statement: "ã¯ãã¯ä¸¡çé¡ã§ãã", answer: false },
-  { statement: "ãã¿ã«ã¯çºåããæè«ã§ãã", answer: true },
-  { statement: "è±¡ã®å¦å¨ æéã¯2å¹´è¿ããã", answer: true },
-  { statement: "ã¤ã«ã«ã¯é­é¡ã§ãã", answer: false },
-  { statement: "ã«ã¿ãã ãªã«ã¯æ­¯ããã", answer: true },
-  { statement: "ããã§ã¦ã¯ä¸çä¸å¤§ããé³¥ã§ãã", answer: true },
-  { statement: "ãµã¡ã¯åºä¹³é¡ã§ãã", answer: false },
+  // === 生物・動物 ===
+  { statement: "クジラは哔乹動物である", answer: true },
+  { statement: "ペンギンは飛べない鳥である", answer: true },
+  { statement: "蜧蛛は昆襲である", answer: false },
+  { sttement: "トカゲは爬虫類である", answer: true },
+  { statement: "コウモリは哺乳動物である", answer: true },
+  { statement: "ワニは両生類である", answer: false },
+  { statement: "ホタルは発光する昆虫である", answer: true },
+  { statement: "象の妊娠期間は2年近くある", answer: true },
+  { statement: "イルカは魚類である", answer: false },
+  { statement: "カタツムリには歯がある", answer: true },
+  { statement: "ダチョウは世界一大きい鳥である", answer: true },
+  { statement: "サメは哺乳類である", answer: false },
 
-  // === åå­¦ã»åç´  ===
-  { statement: "é¸ç´ ã¯ãã¹ã¦ã®ç©è³ªã«å«ã¾ãã¦ãã", answer: false },
-  { statement: "å¡©åãããªã¦ã ã¯é£å¡©ã§ãã", answer: true },
-  { statement: "ç ç³ã®ä¸»æåã¯ããã¦ç³ã§ãã", answer: true },
-  { statement: "æ°´ç´ ã¨é¸ç´ ã®ååæ¯ã¯1:2ã§ãã", answer: true },
-  { statement: "äºé¸åç­ç´ ã¯ç©ºæ°ããè»½ã", answer: false },
-  { statement: "é¼éã¯éã¨ç­ç´ ã®åéã§ãã", answer: true },
-  { statement: "ããªã¦ã ã¯ç©ºæ°ããéã", answer: false },
-  { statement: "éã¯é¸ã«æº¶ããªã", answer: false },
+  // === 化学・元素 ===
+  { statement: "酸素はすべての物質に含まれている", answer: false },
+  { statement: "塩化ナトリウムは食塩である", answer: true },
+  { statement: "砂糖の主成分はブドウ糖である", answer: true },
+  { statement: "水素と酸素の化合比は1:2である", answer: true },
+  { statement: "二酸化炭素は空気より軽い", answer: false },
+  { statement: "鋼鉄は鉄と炭素の合金である", answer: true },
+  { statement: "ヘリウムは空気より重い", answer: false },
+  { statement: "金は酸に溶けない", answer: false },
 
-  // === æ­´å²ã»æ¥æ¬ ===
-  { statement: "æ±æ¸æä»£ã¯ç´250å¹´éç¶ãã", answer: true },
-  { statement: "èå¾³å¤ªå­ã¯é£é³¥æä»£ã®äººç©ã§ãã", answer: true },
-  { statement: "å®¤çºå¹åºã®å°è»ã¯15äººã§ãã", answer: false },
-  { statement: "éåå¹åºã¯æºé ¼æãéãã", answer: true },
-  { statement: "å¹³æ¸çã¯å¹³å®æä»£ã®è²´æã§ãã", answer: true },
-  { statement: "ç¹ç°ä¿¡é·ã¯å¾³å·å®¶åº·ã®å¾ç¶èã§ãã", answer: false },
-  { statement: "ææ²»ç¶­æ°ã¯19ä¸ç´ã«èµ·ãã", answer: true },
-  { statement: "é¢ã¶åã®æ¦ãã¯1600å¹´ã«èµ·ãã", answer: true },
+  // === 歴史・日本 ===
+  { statement: "江戸時代は約250年間続いた", answer: true },
+  { statement: "聖徳太子は飛鳥時代の人物である", answer: true },
+  { statement: "室町幕府の将軍は15人である", answer: false },
+  { statement: "鎌倉幕府は源頼朝が開いた", answer: true },
+  { statement: "平清盛は平安時代の貴族である", answer: true },
+  { statement: "織田信長は徳川家康の後継者である", answer: false },
+  { statement: "明治維新は19世紀に起きた", answer: true },
+  { statement: "関ヶ原の戦いは1600年に起きた", answer: true },
 
-  // === æ­´å²ã»ä¸ç ===
-  { statement: "ããã¬ãªã³ã¯ãã©ã³ã¹ã®çå¸ã«ãªã£ã", answer: true },
-  { statement: "ã«ã¤16ä¸ã¯ãã©ã³ã¹é©å½ã§å¦åããã", answer: true },
-  { statement: "ã¢ã¡ãªã«ç¬ç«æ¦äºã¯18ä¸ç´ã«èµ·ãã", answer: true },
-  { statement: "å¤ä»£ã¨ã¸ããã®ãã©ãããã¯ãã¤ã©ãä¿å­ããããã«ä½ããã", answer: true },
-  { statement: "ä¸éã®é·åã¯ä¸­å½ã§ä½ããã", answer: true },
-  { statement: "ã³ã­ã³ãã¹ã¯ã¤ã³ãã«å°çãã", answer: false },
+  // === 歴史・世界 ===
+  { statement: "ナポレオンはフランスの皇帝になった", answer: true },
+  { statement: "ルイ16世はフランス革命で処刑された", answer: true },
+  { statement: "アメリカ独立戦争は18世紀に起きた", answer: true },
+  { statement: "古代エジプトのピラミッドはミイラを保存するために作られた", answer: true },
+  { statement: "万里の長城は中国で作られた", answer: true },
+  { statement: "コロンブスはインドに到着した", answer: false },
 
-  // === æ¥å¸¸ããªãã¢ ===
-  { statement: "è¹ã¯7è²ã§ãã", answer: true },
-  { statement: "çä¹³ã¯ç½ãããç½ãè²ç´ ãå«ã¾ãã¦ãã", answer: false },
-  { statement: "èèã¯èããªãé£ã¹ç©ã§ãã", answer: true },
-  { statement: "ãããã¯éèã§ãã", answer: false },
-  { statement: "ãããã¯æç©ã§ãã", answer: true },
-  { statement: "äººéã¯7æéã®ç¡ç ã§ååã§ãã", answer: false },
-  { statement: "ç¬ã¯èµ¤ã¨ç·ãåºå¥ã§ããªã", answer: true },
-  { statement: "äººéã®éª¨ã®æ°ã¯ç´206æ¬ã§ãã", answer: true },
-  { statement: "1å¹´ã¯365æ¥ã¡ããã©ã§ãã", answer: false },
-  { statement: "ã¬ã¢ã³ã¯ãã¡ããããã¿ãã³Cãå¤ã", answer: false },
-  { statement: "äººéã®è¡æF²åã¯4ç¨®é¡ãã", answer: true },
-  { statement: "åæ¥µã«ã¯é¸å°ããªã", answer: true },
+  // === 日常トリビア ===
+  { statement: "虹は7色である", answer: true },
+  { statement: "牛乳は白いから白い色素が含まれている", answer: false },
+  { statement: "蜂蜜は腐らない食べ物である", answer: true },
+  { statement: "トマトは野菜である", answer: false },
+  { statement: "バナナは果物である", answer: true },
+  { statement: "人間は7時間の睡眠で十分である", answer: false },
+  { statement: "犬は赤と緑を区別できない", answer: true },
+  { statement: "人間の骨の数は約206本である", answer: true },
+  { statement: "1年は365日ちょうどである", answer: false },
+  { statement: "レモンはいちごよりビタミンCが多い", answer: false },
+  { statement: "人間の血液型は4種類ある", answer: true },
+  { statement: "北極には陸地がない", answer: true },
 ];
 
 // ========================================
@@ -561,7 +561,7 @@ function startGame() {
 
   document.getElementById('hud-score').textContent = '0';
   document.getElementById('hud-combo').textContent = '';
-  document.getElementById('hud-miss').textContent = 'â¥â¥â¥';
+  document.getElementById('hud-miss').textContent = '♥♥♥';
 
   showScreen('countdown-screen');
   runCountdown();
@@ -668,11 +668,11 @@ function answer(playerAnswer) {
     combo = 0;
 
     clickedBtn.classList.add('flash-wrong');
-    showflash('wrong');
+    showFlash('wrong');
     playSE('wrong');
 
     // Update hearts
-    const hearts = 'â¥'.repeat(Math.max(0, 3 - missCount)) + 'â¡'.repeat(missCount);
+    const hearts = '♥'.repeat(Math.max(0, 3 - missCount)) + '♡'.repeat(missCount);
     document.getElementById('hud-miss').textContent = hearts;
   }
 
@@ -725,10 +725,10 @@ function showResult() {
   showScreen('result-screen');
   document.getElementById('result-score').textContent = score;
 
-  const statsHtml = `æ­£è§£: ${correctCount} å / ä¸æ­£è§£: ${incorrectCount} å<br>` +
-    `æå¤§ã³ã³ã: ${maxCombo}<br>` +
-    `ã¹ãã¼ããã¼ãã¹åè¨: +${speedBonusTotal}<br>` +
-    `ã³ã³ããã¼ãã¹åè¨: +${comboBonusTotal}`;
+  const statsHtml = `正解: ${correctCount} 問 / 不正解: ${incorrectCount} 問<br>` +
+    `最大コンボ: ${maxCombo}<br>` +
+    `スピードボーナス合計: +${speedBonusTotal}<br>` +
+    `コンボボーナス合計: +${comboBonusTotal}`;
   document.getElementById('result-stats').innerHTML = statsHtml;
 
   // Check new record
@@ -751,7 +751,7 @@ function showResult() {
 function updateBestScore() {
   const best = localStorage.getItem('marubatsu_best');
   const el = document.getElementById('best-score-display');
-  el.textContent = best ? `ð ãã¹ãã¹ã³ã¢: ${best}` : '';
+  el.textContent = best ? `🏆 ベストスコア: ${best}` : '';
 }
 
 // ========================================
@@ -778,7 +778,7 @@ async function supabaseFetch(path, options = {}) {
 
 async function saveScore() {
   const nameInput = document.getElementById('player-name');
-  const name = nameInput.value.trim() || 'åç¡ã';
+  const name = nameInput.value.trim() || '名無し';
   const statusEl = document.getElementById('save-status');
 
   localStorage.setItem('marubatsu_name', name);
@@ -791,7 +791,7 @@ async function saveScore() {
   localStorage.setItem('marubatsu_local_scores', JSON.stringify(localScores));
 
   // Save to Supabase
-  statusEl.textContent = 'ä¿å­ä¸­...';
+  statusEl.textContent = '保存中...';
   statusEl.style.color = 'var(--dim)';
   document.getElementById('save-btn').disabled = true;
 
@@ -801,10 +801,10 @@ async function saveScore() {
       prefer: 'return=minimal',
       body: JSON.stringify({ name, score, correct: correctCount, incorrect: incorrectCount, combo: maxCombo }),
     });
-    statusEl.textContent = 'â ä¿å­ãã¾ããï¼';
+    statusEl.textContent = '✅ 保存しました！';
     statusEl.style.color = 'var(--success)';
   } catch (e) {
-    statusEl.textContent = 'â ï¸ ãªã³ã©ã¤ã³ä¿å­ã«å¤±æï¼ã­ã¼ã«ã«ã«ã¯ä¿å­æ¸ã¿ï¼';
+    statusEl.textContent = '⚠️ オンライン保存に失敗（ローカルには保存済み）';
     statusEl.style.color = 'var(--accent)';
   }
 }
@@ -829,12 +829,12 @@ function switchRankingTab(tab) {
 
 async function loadGlobalRanking() {
   const list = document.getElementById('ranking-list');
-  list.innerHTML = '<div class="ranking-loading"><span class="spinner"></span>èª­ã¿è¾¼ã¿ä¸­...</div>';
+  list.innerHTML = '<div class="ranking-loading"><span class="spinner"></span>読み込み中...</div>';
   try {
     const data = await supabaseFetch('marubatsu_sprint_scores?select=name,score,correct,combo,created_at&order=score.desc&limit=50');
     renderRanking(data);
   } catch (e) {
-    list.innerHTML = '<div class="ranking-loading">ã©ã³ã­ã³ã°ãåå¾ã§ãã¾ããã§ãã</div>';
+    list.innerHTML = '<div class="ranking-loading">ランキングを取得できませんでした</div>';
   }
 }
 
@@ -846,13 +846,13 @@ function loadLocalRanking() {
 function renderRanking(data) {
   const list = document.getElementById('ranking-list');
   if (!data || data.length === 0) {
-    list.innerHTML = '<div class="ranking-loading">ã¾ã è¨é²ãããã¾ãã</div>';
+    list.innerHTML = '<div class="ranking-loading">まだ記録がありません</div>';
     return;
   }
   list.innerHTML = data.map((d, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : '';
-    const medal = rank === 1 ? 'ð' : rank === 2 ? 'ð¥' : rank === 3 ? 'ð¥' : rank;
+    const medal = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
     const dateStr = d.created_at ? new Date(d.created_at).toLocaleDateString('ja-JP') : '';
     return `<div class="ranking-item">
       <div class="rank-num ${rankClass}">${medal}</div>
@@ -874,9 +874,9 @@ function escapeHtml(str) {
 document.addEventListener('keydown', (e) => {
   if (!isAnswering) return;
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-    answer(true); // â
+    answer(true); // ○
   } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-    answer(false); // â
+    answer(false); // ✕
   }
 });
 
