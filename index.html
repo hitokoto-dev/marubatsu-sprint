@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>○✕ 早押し○✕判定</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a1a;
+    --card: #151530;
+    --accent: #ff6b35;
+    --accent2: #00e5ff;
+    --success: #00e676;
+    --fail: #ff1744;
+    --text: #ffffff;
+    --dim: #8888aa;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; padding: 20px; }
+  .screen.active { display: flex; }
+
+  /* Title Screen */
+  #title-screen { gap: 20px; background: radial-gradient(ellipse at center, #1a1a3a 0%, var(--bg) 70%); }
+  .game-logo { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; line-height: 1.2; }
+  .game-subtitle { color: var(--dim); font-size: clamp(0.9rem, 2.5vw, 1.2rem); text-align: center; margin-bottom: 10px; }
+
+  .btn {
+    padding: 16px 48px; font-size: 1.3rem; font-weight: 700;
+    border: none; border-radius: 60px; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #ff8a50); color: #fff; box-shadow: 0 4px 20px rgba(255,107,53,0.4); }
+  .btn-secondary { background: transparent; color: var(--accent2); border: 2px solid var(--accent2); padding: 12px 36px; font-size: 1rem; }
+
+  .best-score-display { color: var(--accent2); font-size: 1rem; margin-top: 8px; }
+
+  .rule-box {
+    background: var(--card); border-radius: 16px; padding: 16px 20px;
+    max-width: 340px; width: 100%; text-align: left;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .rule-box p { color: var(--dim); font-size: 0.85rem; line-height: 1.7; }
+  .rule-box .rule-title { color: var(--accent2); font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
+
+  /* Sound toggle */
+  .sound-toggle {
+    position: fixed; top: 12px; right: 12px; z-index: 200;
+    background: var(--card); border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text); font-size: 1.4rem; width: 44px; height: 44px;
+    border-radius: 50%; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .sound-toggle:active { transform: scale(0.9); }
+
+  /* Countdown */
+  #countdown-screen { background: var(--bg); }
+  .countdown-number {
+    font-size: clamp(8rem, 30vw, 16rem); font-weight: 900;
+    animation: countPulse 0.6s ease-out;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  @keyframes countPulse {
+    0% { transform: scale(2); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Game Screen */
+  #game-screen { padding: 0; position: relative; background: var(--bg); }
+
+  .game-hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px; background: rgba(0,0,0,0.5);
+    z-index: 10; font-size: clamp(0.85rem, 2vw, 1rem);
+  }
+  .hud-score { color: var(--accent); font-weight: 700; }
+  .hud-combo { col60px 20px 20px; width: 100%;
+  }
+
+  .statement-box {
+    background: var(--card); border-radius: 20px; padding: 24px 28px;
+    max-width: 500px; width: 100%; text-align: center;
+    border: 2px solid rgba(255,255,255,0.1);
+    margin-bottom: 32px; min-height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+  }
+  .statement-text {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 700; line-height: 1.5;
+  }
+
+  /* ◯✕ Buttons */
+  .marubatsu-buttons {
+    display: flex; gap: 24px; width: 100%; max-width: 400px; justify-content: center;
+  }
+  .mb-btn {
+    flex: 1; max-width: 160px; aspect-ratio: 1;
+    border-radius: 50%; border: 4px solid;
+    font-size: clamp(3rem, 12vw, 5rem); font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.12s;
+    -webkit-tap-highlight-color: transparent;
+    background: var(--card); position: relative;
+  }
+  .mb-btn:active { transform: scale(0.9); }
+  .mb-btn-maru {
+    border-color: rgba(0, 230, 118, 0.6); color: var(--success);
+  }
+  .mb-btn-maru:active, .mb-btn-maru:hover {
+    background: rgba(0, 230, 118, 0.15); box-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+  }
+  .mb-btn-batsu {
+    border-color: rgba(255, 23, 68, 0.6); color: var(--fail);
+  }
+  .mb-btn-batsu:active, .mb-btn-batsu:hover {
+    background: rgba(255, 23, 68, 0.15); box-shadow: 0 0 30px rgba(255, 23, 68, 0.3);
+  }
+  .mb-btn-label {
+    position: absolute; bottom: -28px; font-size: 0.8rem;
+    color: var(--dim); font-weight: 700;
+  }
+
+  .mb-btn.flash-correct { background: var(--success) !important; border-color: var(--success) !important; color: #fff !important; }
+  .mb-btn.flash-wrong { background: var(--fail) !important; border-color: var(--fail) !important; color: #fff !important; }
+
+  /* Flash overlay */
+  .flash-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 100;
+    animation: flash 0.3s ease-out forwards;
+  }
+  .flash-correct-bg { background: rgba(0, 230, 118, 0.25); }
+  .flash-wrong-bg   { background: rgba(255, 23, 68, 0.4); }
+  @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* Combo popup */
+  .combo-popup {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(2rem, 8vw, 4rem); font-weight: 900;
+    pointer-events: none; z-index: 50;
+    animation: comboAnim 0.8s ease-out forwards;
+    color: var(--accent2); text-shadow: 0 0 30px rgba(0, 229, 255, 0.6);
+  }
+  @keyframes comboAnim {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    30%  { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+  }
+
+  /* Speed bonus popup */
+  .speed-popup {
+    position: fixed; top: 35%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(1rem, 4vw, 1.5rem); font-weight: 900;
+    pointer-events: none; z-index: 49;
+    animation: speedAnim 0.6s ease-out forwards;
+    color: var(--accent);
+  }
+  @keyframes speedAnim {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    30%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -70%) scale(1); opacity: 0; }
+  }
+
+  /* Result Screen */
+  #result-screen { gap: 14px; background: radial-gradient(ellipse at center, #1a1a3a 0%, var(--bg) 70%); }
+  .result-label { font-size: 1.2rem; color: var(--dim); }
+  .result-score {
+    font-size: clamp(4rem, 15vw, 8rem); font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .result-stats { text-align: center; color: var(--dim); line-height: 2; font-size: 1rem; }
+  .result-new-record { color: var(--accent); font-weight: 700; font-size: 1.2rem; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* Ranking Screen */
+  #ranking-screen { gap: 16px; padding: 20px; overflow-y: auto; justify-content: flex-start; padding-top: 40px; }
+  .ranking-title { font-size: 1.8rem; font-weight: 900; color: var(--accent2); margin-bottom: 8px; }
+  .ranking-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ranking-tab {
+    padding: 8px 20px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.15);
+    background: transparent; color: var(--dim); font-weight: 700;
+    cursor: pointer; font-family: inherit; font-size: 0.9rem;
+  }
+  .ranking-tab.active { background: var(--accent2); color: #000; border-color: var(--accent2); }
+  .ranking-list { width: 100%; max-width: 400px; }
+  .ranking-item {
+    display: flex; align-items: center; padding: 14px 16px;
+    background: var(--card); border-radius: 12px; margin-bottom: 8px; gap: 12px;
+  }
+  .rank-num { font-size: 1.4rem; font-weight: 900; min-width: 40px; text-align: center; }
+  .rank-1 { color: #ffd700; } .rank-2 { color: #c0c0c0; } .rank-3 { color: #cd7f32; }
+  .rank-name { flex: 1; font-weight: 700; }
+  .rank-score { color: var(--accent2); font-weight: 700; font-size: 1.1rem; }
+  .rank-date { color: var(--dim); font-size: 0.75rem; }
+  .ranking-loading { text-align: center; color: var(--dim); padding: 40px; }
+  .ranking-loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--dim); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .save-status { font-size: 0.85rem; margin-top: 4px; min-height: 20px; }
+
+  .name-input-area { display: flex; gap: 8px; margin-top: 8px; width: 100%; max-width: 300px; }
+  .name-input-area input {
+    flex: 1; padding: 12px 16px; border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2); background: var(--card);
+    color: var(--text); font-size: 1rem; font-family: inherit; outline: none;
+  }
+  .name-input-area input:focus { border-color: var(--accent2); }
+
+  .kb-hint { color: var(--dim); font-size: 0.8rem; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Sound Toggle -->
+<button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊</button>
+
+<!-- Title Screen -->
+<div id="title-screen" class="screen active">
+  <div class="game-logo">◯✕ 早押し<br>判定</div>
+  <div class="game-subtitle">文が正しければ◯、間違いなら✕を選ぼう</div>
+  <button class="btn btn-primary" onclick="startGame()">スタート</button>
+  <button class="btn btn-secondary" onclick="showRanking()">🏆 ランキング</button>
+  <div class="best-score-display" id="best-score-display"></div>
+  <div class="rule-box">
+    <div class="rule-title">📖 あそびかた</div>
+    <p>
+      ・表示される文が正しければ ◯ をタップ<br>
+      ・間違っていれば ✕ をタップ<br>
+      ・2秒以内に正解でスピードボーナス +50<br>
+      ・5連続正解でコンボボーナス +100<br>
+      ・3回ミスでゲームオーバー
+    </p>
+  </div>
+  <div class="kb-hint">⌨️ キーボード: ← ◯ / → ✕</div>
+</div>
+
+<!-- Countdown Screen -->
+<div id="countdown-screen" class="screen">
+  <div class="countdown-number" id="countdown-num">3</div>
+</div>
+
+<!-- Game Screen -->
+<div id="game-screen" class="screen">
+  <div class="game-hud">
+    <div class="hud-score">スコア: <span id="hud-score">0</span></div>
+    <div class="hud-combo" id="hud-combo"></div>
+    <div class="hud-miss" id="hud-miss">❤❤❤</div>
+  </div>
+
+  <div class="question-area">
+    <div class="statement-box" id="statement-box">
+      <div class="statement-text" id="statement-text"></div>
+    </div>
+    <div class="marubatsu-buttons">
+      <div class="mb-btn mb-btn-maru" id="btn-maru" onclick="answer(true)">
+        ◯
+        <span class="mb-btn-label">正しい</span>
+      </div>
+      <div class="mb-btn mb-btn-batsu" id="btn-batsu" onclick="answer(false)">
+        ✕
+        <span class="mb-btn-label">間違い</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Result Screen -->
+<div id="result-screen" class="screen">
+  <div class="result-label">スコア</div>
+  <div class="result-score"" id="result-score">0</div>
+  <div id="result-new-record" class="result-new-record" style="display:none">🎉 NEW RECORD!</div>
+  <div class="result-stats" id="result-stats"></div>
+  <div class="name-input-area" id="name-input-area">
+    <input type="text" id="player-name" placeholder="名前を入力" maxlength="10">
+    <button class="btn btn-primary" style="padding:12px 24px;font-size:1rem" id="save-btn" onclick="saveScore()">保存</button>
+  </div>
+  <div class="save-status" id="save-status"></div>
+  <button class="btn btn-primary" onclick="startGame()" style="margin-top:8px">もう一度</button>
+  <button class="btn btn-secondary" onclick="showRanking()">🏆 ランキング</button>
+  <button class="btn btn-secondary" onclick="showTitle()">タイトルへ</button>
+</div>
+
+<!-- Ranking Screen -->
+<div id="ranking-screen" class="screen">
+  <div class="ranking-title">🏆 ランキング</div>
+  <div class="ranking-tabs">
+    <button class="ranking-tab active" id="tab-global" onclick="switchRankingTab('global')">🌍 全員</button>
+    <button class="ranking-tab" id="tab-local" onclick="switchRankingTab('local')">📱 自分</button>
+  </div>
+  <div class="ranking-list" id="ranking-list"></div>
+  <button class="btn btn-secondary" onclick="showTitle()" style="margin-top:16px">戻る</button>
+</div>
+
+<script>
+// ========================================
+// AUDIO ENGINE
+// ========================================
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+function playSE(type) {
+  if (!soundEnabled || !audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  if (type === 'correct') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(660, now);
+    osc.frequency.linearRampToValueAtTime(880, now + 0.08);
+    osc.frequency.linearRampToValueAtTime(1100, now + 0.15);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.25);
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(880, now + 0.03);
+    osc2.frequency.linearRampToValueAtTime(1320, now + 0.15);
+    gain2.gain.setValueAtTime(0.12, now + 0.03);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc2.connect(gain2).connect(audioCtx.destination);
+    osc2.start(now + 0.03); osc2.stop(now + 0.3);
+  }
+  else if (type === 'wrong') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.35);
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(180, now);
+    osc2.frequency.linearRampToValueAtTime(80, now + 0.25);
+    gain2.gain.setValueAtTime(0.08, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc2.connect(gain2).connect(audioCtx.destination);
+    osc2.start(now); osc2.stop(now + 0.3);
+  }
+  else if (type === 'countdown') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, now);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.2);
+  }
+  else if (type === 'start') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(784, now);
+    osc.frequency.linearRampToValueAtTime(1047, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.3);
+  }
+  else if (type === 'combo') {
+    [0, 0.08, 0.16].forEach((delay, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime([523, 659, 784][i], now + delay);
+      gain.gain.setValueAtTime(0.2, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now + delay); osc.stop(now + delay + 0.15);
+    });
+  }
+  else if (type === 'gameover') {
+    [0, 0.15, 0.3].forEach((delay, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime([392, 330, 262][i], now + delay);
+      gain.gain.setValueAtTime(0.2, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.3);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now + delay); osc.stop(now + delay + 0.3);
+    });
+  }
+}
+
+// ========================================
+// QUESTIONS (60問)
+// ========================================
+const questions = [
+  // === 日本地理・地形 ===
+  { statement: "富士山は日本一高い山である", answer: true },
+  { statement: "北海道は日本一面積が広い都道府県である", answer: true },
+  { statement: "琶琶湖は日本一大きい湖である", answer: true },
+  { statement: "最北端の都道府県は北海道である", answer: true },
+  { statement: "最南端の都道府県は沖縄県である", answer: false },
+  { statement: "日本の首都は東京都である", answer: true },
+  { statement: "瀬戸内海は世界一大きい内海である", answer: false },
+  { statement: "本州は日本一大きい島である", answer: true },
+  { statement: "日本で一番長い川は信濃川である", answer: true },
+  { statement: "四国は九州より面積が大きい", answer: false },
+  { statement: "東京スカイツリーは東京タワーより高い", answer: true },
+  { statement: "日本には47の都道府県がある", answer: true },
+  { statement: "沖縄県は日本で一番人口が少ない県である", answer: false },
+  { statement: "日本海は太平洋より大きい", answer: false },
+
+  // === 科学・物理 ===
+  { statement: "水の沸点は100℃である", answer: true },
+  { statement: "金は銀より密度が高い", answer: true },
+  { statement: "光の速度は音の速度より速い", answer: true },
+  { statement: "鉄は磁石に引き付けられる", answer: true },
+  { statement: "プラスチックは燃えない素材である", answer: false },
+  { statement: "地球は太陽より大きい", answer: false },
+  { statement: "ダイヤモンドは炭素からできている", answer: true },
+  { statement: "電気は目で見ることができる", answer: false },
+  { statement: "月は地球の周りを回っている", answer: true },
+  { statement: "太陽は地球の周りを回っている", answer: false },
+  { statement: "氷は水より密度が低い", answer: true },
+  { statement: "音は真空中を伝わる", answer: false },
+
+  // === 生物・動物 ===
+  { statement: "クジラは哺乳動物である", answer: true },
+  { statement: "ペンギンは飛べない鳥である", answer: true },
+  { statement: "蜘蛛は昆虫である", answer: false },
+  { statement: "トカゲは爬虫類である", answer: true },
+  { statement: "コウモリは哺乳動物である", answer: true },
+  { statement: "ワニは両生類である", answer: false },
+  { statement: "ホタルは発光する昆虫である", answer: true },
+  { statement: "象の妊娠期間は2年近くある", answer: true },
+  { statement: "イルカは魚類である", answer: false },
+  { statement: "カタツムリには歯がある", answer: true },
+  { statement: "ダチョウは世界一大きい鳥である", answer: true },
+  { statement: "サメは哺乳類である", answer: false },
+
+  // === 化学・元素 ===
+  { statement: "酸素はすべての物質に含まれている", answer: false },
+  { statement: "塩化ナトリウムは食塩である", answer: true },
+  { statement: "砂糖の主成分はブドウ糖である", answer: true },
+  { statement: "水素と酸素の化合比は1:2である", answer: true },
+  { statement: "二酸化炭素は空気より軽い", answer: false },
+  { statement: "鋼鉄は鉄と炭素の合金である", answer: true },
+  { statement: "ヘリウムは空気より重い", answer: false },
+  { statement: "金は酸に溶けない", answer: false },
+
+  // === 歴史・日本 ===
+  { statement: "江戸時代は約250年間続いた", answer: true },
+  { statement: "聖徳太子は飛鳥時代の人物である", answer: true },
+  { statement: "室町幕府の将軍は15人である", answer: false },
+  { statement: "鎌倉幕府は源頼朝が開いた", answer: true },
+  { statement: "平清盛は平安時代の貴族である", answer: true },
+  { statement: "織田信長は徳川家康の後継者である", answer: false },
+  { statement: "明治維新は19世紀に起きた", answer: true },
+  { statement: "関ヶ原の戦いは1600年に起きた", answer: true },
+
+  // === 歴史・世界 ===
+  { statement: "ナポレオンはフランスの皇帝になった", answer: true },
+  { statement: "ルイ16世はフランス革命で処刑された", answer: true },
+  { statement: "アメリカ独立戦争は18世紀に起きた", answer: true },
+  { statement: "古代エジプトのピラミッドはミイラを保存するために作られた", answer: true },
+  { statement: "万里の長城は中国で作られた", answer: true },
+  { statement: "コロンブスはインドに到着した", answer: false },
+
+  // === 日常トリビア ===
+  { statement: "虹は7色である", answer: true },
+  { statement: "牛乳は白いから白い色素が含まれている", answer: false },
+  { statement: "蜂蜜は腐らない食べ物である", answer: true },
+  { statement: "トマトは野菜である", answer: false },
+  { statement: "バナナは果物である", answer: true },
+  { statement: "人間は7時間の睡眠で十分である", answer: false },
+  { statement: "犬は赤と緑を区別できない", answer: true },
+  { statement: "人間の骨の数は約206本である", answer: true },
+  { statement: "1年は365日ちょうどである", answer: false },
+  { statement: "レモンはいちごよりビタミンCが多い", answer: false },
+  { statement: "人間の血液型は4種類ある", answer: true },
+  { statement: "北極には陸地がない", answer: true },
+];
+
+// ========================================
+// GAME STATE
+// ========================================
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let correctCount = 0;
+let incorrectCount = 0;
+let missCount = 0;
+let currentQuestion = null;
+let questionStartTime = 0;
+let isAnswering = false;
+let usedQuestions = [];
+let speedBonusTotal = 0;
+let comboBonusTotal = 0;
+
+// ========================================
+// SCREEN MANAGEMENT
+// ========================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showTitle() { showScreen('title-screen'); updateBestScore(); }
+
+// ========================================
+// GAME FLOW
+// ========================================
+function startGame() {
+  initAudio();
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  correctCount = 0;
+  incorrectCount = 0;
+  missCount = 0;
+  speedBonusTotal = 0;
+  comboBonusTotal = 0;
+  usedQuestions = [];
+  isAnswering = false;
+
+  document.getElementById('hud-score').textContent = '0';
+  document.getElementById('hud-combo').textContent = '';
+  document.getElementById('hud-miss').textContent = '❤❤❤';
+
+  showScreen('countdown-screen');
+  runCountdown();
+}
+
+function runCountdown() {
+  let count = 3;
+  const el = document.getElementById('countdown-num');
+  el.textContent = count;
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'countPulse 0.6s ease-out';
+  playSE('countdown');
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      el.textContent = count;
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'countPulse 0.6s ease-out';
+      playSE('countdown');
+    } else if (count === 0) {
+      el.textContent = 'START!';
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'countPulse 0.6s ease-out';
+      playSE('start');
+    } else {
+      clearInterval(interval);
+      showScreen('game-screen');
+      nextQuestion();
+    }
+  }, 700);
+}
+
+function getRandomQuestion() {
+  // If all questions used, reset
+  if (usedQuestions.length >= questions.length) {
+    usedQuestions = [];
+  }
+  const available = questions.filter((_, i) => !usedQuestions.includes(i));
+  const idx = questions.indexOf(available[Math.floor(Math.random() * available.length)]);
+  usedQuestions.push(idx);
+  return questions[idx];
+}
+
+function nextQuestion() {
+  currentQuestion = getRandomQuestion();
+  document.getElementById('statement-text').textContent = currentQuestion.statement;
+  document.getElementById('statement-box').style.borderColor = 'rgba(255,255,255,0.1)';
+  questionStartTime = Date.now();
+  isAnswering = true;
+
+  // Reset button states
+  document.getElementById('btn-maru').classList.remove('flash-correct', 'flash-wrong');
+  document.getElementById('btn-batsu').classList.remove('flash-correct', 'flash-wrong');
+}
+
+function answer(playerAnswer) {
+  if (!isAnswering) return;
+  isAnswering = false;
+
+  const elapsed = (Date.now() - questionStartTime) / 1000;
+  const isCorrect = (playerAnswer === currentQuestion.answer);
+
+  const maruBtn = document.getElementById('btn-maru');
+  const batsuBtn = document.getElementById('btn-batsu');
+  const clickedBtn = playerAnswer ? maruBtn : batsuBtn;
+
+  if (isCorrect) {
+    correctCount++;
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+
+    // Base score
+    let gained = 100;
+
+    // Speed bonus
+    let speedBonus = 0;
+    if (elapsed <= 2.0) {
+      speedBonus = 50;
+      speedBonusTotal += speedBonus;
+      showSpeedPopup('+50 SPEED!');
+    }
+
+    // Combo bonus
+    let comboBonus = 0;
+    if (combo > 0 && combo % 5 === 0) {
+      comboBonus = 100;
+      comboBonusTotal += comboBonus;
+      showComboPopup(combo + ' COMBO!');
+      playSE('combo');
+    }
+
+    score += gained + speedBonus + comboBonus;
+
+    clickedBtn.classList.add('flash-correct');
+    showFlash('correct');
+    playSE('correct');
+  } else {
+    incorrectCount++;
+    missCount++;
+    combo = 0;
+
+    clickedBtn.classList.add('flash-wrong');
+    showFlash('wrong');
+    playSE('wrong');
+
+    // Update hearts
+    const hearts = '❤'.repeat(Math.max(0, 3 - missCount)) + '🤍'.repeat(missCount);
+    document.getElementById('hud-miss').textContent = hearts;
+  }
+
+  // Update HUD
+  document.getElementById('hud-score').textContent = score;
+  document.getElementById('hud-combo').textContent = combo > 1 ? combo + ' COMBO' : '';
+
+  // Check game over
+  if (missCount >= 3) {
+    setTimeout(() => {
+      playSE('gameover');
+      showResult();
+    }, 500);
+    return;
+  }
+
+  // Next question after brief delay
+  setTimeout(() => {
+    nextQuestion();
+  }, 400);
+}
+
+function showFlash(type) {
+  const flash = document.createElement('div');
+  flash.className = 'flash-overlay ' + (type === 'correct' ? 'flash-correct-bg' : 'flash-wrong-bg');
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 350);
+}
+
+function showComboPopup(text) {
+  const popup = document.createElement('div');
+  popup.className = 'combo-popup';
+  popup.textContent = text;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+}
+
+function showSpeedPopup(text) {
+  const popup = document.createElement('div');
+  popup.className = 'speed-popup';
+  popup.textContent = text;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 700);
+}
+
+// ========================================
+// RESULT
+// ========================================
+function showResult() {
+  showScreen('result-screen');
+  document.getElementById('result-score').textContent = score;
+
+  const statsHtml = `正解: ${correctCount} 問 / 不正解: ${incorrectCount} 問<br>` +
+    `最大コンボ: ${maxCombo}<br>` +
+    `スピードボーナス合計: +${speedBonusTotal}<br>` +
+    `コンボボーナス合計: +${comboBonusTotal}`;
+  document.getElementById('result-stats').innerHTML = statsHtml;
+
+  // Check new record
+  const best = parseInt(localStorage.getItem('marubatsu_best') || '0');
+  const recordEl = document.getElementById('result-new-record');
+  if (score > best) {
+    localStorage.setItem('marubatsu_best', score);
+    recordEl.style.display = 'block';
+  } else {
+    recordEl.style.display = 'none';
+  }
+
+  // Restore saved name
+  const savedName = localStorage.getItem('marubatsu_name') || '';
+  document.getElementById('player-name').value = savedName;
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-status').textContent = '';
+}
+
+function updateBestScore() {
+  const best = localStorage.getItem('marubatsu_best');
+  const el = document.getElementById('best-score-display');
+  el.textContent = best ? `🏆 ベストスコア: ${best}` : '';
+}
+
+// ========================================
+// SUPABASE
+// ========================================
+const SUPABASE_URL = 'https://mvnhojzeshbquobffkmq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12bmhvanplc2hicXVvYmZma21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MjQ4NzgsImV4cCI6MjA4ODAwMDg3OH0.kJNoHqJpmC5PLuojOGrnmWBT4TMZG5HbIv7bFY1D3QI';
+
+async function supabaseFetch(path, options = {}) {
+  const res = await fetch(\`\${SUPABASE_URL}/rest/v1/\${path}\`, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': \`Bearer \${SUPABASE_KEY}\`,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || '',
+      ...options.headers,
+    },
+  });
+  if (!res.ok) throw new Error(\`Supabase error: \${res.status}\`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function saveScore() {
+  const nameInput = document.getElementById('player-name');
+  const name = nameInput.value.trim() || '名無し';
+  const statusEl = document.getElementById('save-status');
+
+  localStorage.setItem('marubatsu_name', name);
+
+  // Save locally
+  const localScores = JSON.parse(localStorage.getItem('marubatsu_local_scores') || '[]');
+  localScores.push({ name, score, correct: correctCount, incorrect: incorrectCount, combo: maxCombo, date: new Date().toISOString() });
+  localScores.sort((a, b) => b.score - a.score);
+  if (localScores.length > 50) localScores.length = 50;
+  localStorage.setItem('marubatsu_local_scores', JSON.stringify(localScores));
+
+  // Save to Supabase
+  statusEl.textContent = '保存中...';
+  statusEl.style.color = 'var(--dim)';
+  document.getElementById('save-btn').disabled = true;
+
+  try {
+    await supabaseFetch('marubatsu_sprint_scores', {
+      method: 'POST',
+      prefer: 'return=minimal',
+      body: JSON.stringify({ name, score, correct: correctCount, incorrect: incorrectCount, combo: maxCombo }),
+    });
+    statusEl.textContent = '✅ 保存しました！';
+    statusEl.style.color = 'var(--success)';
+  } catch (e) {
+    statusEl.textContent = '⚠️ オンライン保存に失敗（ローカルには保存済み）';
+    statusEl.style.color = 'var(--accent)';
+  }
+}
+
+// ========================================
+// RANKING
+// ========================================
+let currentRankingTab = 'global';
+
+function showRanking() {
+  showScreen('ranking-screen');
+  switchRankingTab('global');
+}
+
+function switchRankingTab(tab) {
+  currentRankingTab = tab;
+  document.getElementById('tab-global').classList.toggle('active', tab === 'global');
+  document.getElementById('tab-local').classList.toggle('active', tab === 'local');
+  if (tab === 'global') loadGlobalRanking();
+  else loadLocalRanking();
+}
+
+async function loadGlobalRanking() {
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '<div class="ranking-loading"><span class="spinner"></span>読み込み中...</div>';
+  try {
+    const data = await supabaseFetch('marubatsu_sprint_scores?select=name,score,correct,combo,created_at&order=score.desc&limit=50');
+    renderRanking(data);
+  } catch (e) {
+    list.innerHTML = '<div class="ranking-loading">ランキングを取得できませんでした</div>';
+  }
+}
+
+function loadLocalRanking() {
+  const data = JSON.parse(localStorage.getItem('marubatsu_local_scores') || '[]');
+  renderRanking(data.map(d => ({ ...d, created_at: d.date })));
+}
+
+function renderRanking(data) {
+  const list = document.getElementById('ranking-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="ranking-loading">まだ記録がありません</div>';
+    return;
+  }
+  list.innerHTML = data.map((d, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? \`rank-\${rank}\` : '';
+    const medal = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+    const dateStr = d.created_at ? new Date(d.created_at).toLocaleDateString('ja-JP') : '';
+    return \`<div class="ranking-item">
+      <div class="rank-num \${rankClass}">\${medal}</div>
+      <div class="rank-name">\${escapeHtml(d.name)}<br><span class="rank-date">\${dateStr}</span></div>
+      <div class="rank-score">\${d.score}pt</div>
+    div\`;
+  }).join('');
+}>
+  }).join('');
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ========================================
+// KEYBOARD SUPPORT
+// ========================================
+document.addEventListener('keydown', (e) => {
+  if (!isAnswering) return;
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+    answer(true); // ◯
+  } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+    answer(false); // ✕
+  }
+});
+
+// ========================================
+// INIT
+// ========================================
+updateBestScore();
+</script>
+</body>
+</html>
+v>
